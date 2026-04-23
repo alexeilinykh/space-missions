@@ -158,6 +158,38 @@ export function getMostUsedRocket(): string {
 }
 
 /**
+ * Parses a raw Location string and returns a short site label using the
+ * last two comma-separated parts (e.g. "Baikonur Cosmodrome, Kazakhstan").
+ */
+function parseSite(location: string): string {
+  const parts = location.split(',').map((p) => p.trim())
+  return parts.slice(-2).join(', ')
+}
+
+/**
+ * Returns the top n launch sites sorted by mission count descending.
+ * Each element is a [siteName, count] tuple.
+ * Site names are derived from the last two comma-separated parts of the
+ * Location field (e.g. "Baikonur Cosmodrome, Kazakhstan").
+ * Ties are broken alphabetically by site name.
+ * Throws if n is not a positive integer.
+ *
+ * Example: getTopLaunchSitesByMissionCount(3)
+ *          → [["Plesetsk Cosmodrome, Russia", 1278], ...]
+ */
+export function getTopLaunchSitesByMissionCount(n: number): [string, number][] {
+  requirePositiveInteger(n, 'n')
+  const counts = new Map<string, number>()
+  for (const m of getMissions()) {
+    const site = parseSite(m.Location)
+    counts.set(site, (counts.get(site) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, n)
+}
+
+/**
  * Returns the average number of missions per year over [startYear, endYear]
  * (inclusive), rounded to 2 decimal places.
  * Throws if either argument is not an integer, or if startYear is after endYear.

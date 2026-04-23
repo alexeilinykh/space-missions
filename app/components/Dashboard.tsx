@@ -9,6 +9,7 @@ import DataTable from './DataTable'
 import MissionsOverTimeChart from './charts/MissionsOverTimeChart'
 import TopCompaniesChart from './charts/TopCompaniesChart'
 import MissionStatusChart from './charts/MissionStatusChart'
+import TopLaunchSitesChart from './charts/TopLaunchSitesChart'
 
 // ── Types matching the API response shapes ────────────────────────────────────
 
@@ -28,6 +29,7 @@ interface ChartsData {
   byYear: { year: number; count: number }[]
   byCompany: [string, number][]
   byStatus: Record<string, number>
+  byLocation: [string, number][]
 }
 
 // ── SWR fetcher ───────────────────────────────────────────────────────────────
@@ -145,7 +147,7 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
             />
           </div>
 
-          {/* Charts row */}
+          {/* Charts row 1 */}
           <div
             className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${chartsLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
           >
@@ -153,8 +155,12 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
             <MissionStatusChart data={chartsData?.byStatus ?? {}} />
           </div>
 
-          <div className={chartsLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+          {/* Charts row 2 */}
+          <div
+            className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${chartsLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
+          >
             <TopCompaniesChart data={chartsData?.byCompany ?? []} />
+            <TopLaunchSitesChart data={chartsData?.byLocation ?? []} />
           </div>
 
           {/* Data table */}
