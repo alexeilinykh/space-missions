@@ -213,3 +213,16 @@ export function getAverageMissionsPerYear(
   const years = endYear - startYear + 1
   return parseFloat((total / years).toFixed(2))
 }
+
+// ── Module-level constants ────────────────────────────────────────────────────
+// Computed once at module load time (static CSV data never changes).
+
+const _missions = getMissions()
+
+const _years = _missions
+  .map((m) => parseInt(m.Date.slice(0, 4), 10))
+  .filter((y) => !isNaN(y))
+
+export const MIN_YEAR: number = Math.min(..._years)
+export const MAX_YEAR: number = Math.max(..._years)
+export const TOP_COMPANY_NAMES: string[] = getTopCompaniesByMissionCount(15).map(([c]) => c)
