@@ -74,7 +74,13 @@ export async function GET(request: NextRequest) {
     }
     mostUsedRocket = top
   }
-  const avgMissionsPerYear = getAverageMissionsPerYear(startYear, endYear)
+  let avgMissionsPerYear: number
+  if (!filtersActive) {
+    avgMissionsPerYear = getAverageMissionsPerYear(startYear, endYear)
+  } else {
+    const years = endYear - startYear + 1
+    avgMissionsPerYear = parseFloat((missions.length / years).toFixed(2))
+  }
 
   const companyMissionCount = company ? getMissionCountByCompany(company) : undefined
   const companySuccessRate = company ? getSuccessRate(company) : undefined
