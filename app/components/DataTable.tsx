@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import type { Mission } from '@/lib/types'
 
 type SortKey = keyof Pick<Mission, 'Company' | 'Date' | 'Mission' | 'Rocket' | 'MissionStatus' | 'Price'>
@@ -65,7 +65,7 @@ export default function DataTable({ missions, loading }: Props) {
   const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
   const pageData = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  function handleSort(key: SortKey) {
+  const handleSort = useCallback((key: SortKey) => {
     if (key === sortKey) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
     } else {
@@ -73,7 +73,7 @@ export default function DataTable({ missions, loading }: Props) {
       setSortDir('asc')
     }
     setPage(0)
-  }
+  }, [sortKey])
 
   return (
     <div className="flex flex-col gap-3">
@@ -124,9 +124,9 @@ export default function DataTable({ missions, loading }: Props) {
                     ))}
                   </tr>
                 ))
-              : pageData.map((m, i) => (
+              : pageData.map((m) => (
               <tr
-                key={`${m.Date}-${m.Mission}-${i}`}
+                key={`${m.Date}-${m.Company}-${m.Mission}`}
                 className="transition hover:bg-gray-50 dark:hover:bg-gray-800/40"
               >
                 <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">

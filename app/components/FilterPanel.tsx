@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import type { MissionStatus } from '@/lib/types'
 
 const ALL_STATUSES: MissionStatus[] = [
@@ -57,12 +57,12 @@ export default function FilterPanel({
     setLocalEnd(String(pending.endYear))
   }
 
-  function toggleStatus(s: MissionStatus) {
+  const toggleStatus = useCallback((s: MissionStatus) => {
     const next = new Set(pending.statuses)
     if (next.has(s)) next.delete(s)
     else next.add(s)
-    setPending({ ...pending, statuses: next })
-  }
+    setPending((prev) => ({ ...prev, statuses: next }))
+  }, [pending.statuses])
 
   function handleApply() {
     const rawStart = parseInt(localStart, 10)

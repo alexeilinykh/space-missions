@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import useSWR from 'swr'
 import type { Mission, MissionStatus } from '@/lib/types'
 import FilterPanel, { type Filters } from './FilterPanel'
@@ -96,7 +96,7 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
 
   // swrParams is derived directly from applied filters — no debounce needed
   // since FilterPanel now only calls onChange on explicit Apply / Reset.
-  const swrParams = buildParams(filters)
+  const swrParams = useMemo(() => buildParams(filters), [filters])
 
   const { data, isLoading } = useSWR<AllData>(
     `/api/missions/all?${swrParams}`,
@@ -146,7 +146,7 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
           <div
             className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${isLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
           >
-            <MissionsOverTimeChart data={data?.charts.byYear ?? EMPTY_YEAR_DATA} />
+            <MissionsOverTimeChart data={data?.charts.byYear ?? EMPTY_YEAR_DATA} minYear={minYear} maxYear={maxYear} />
             <MissionStatusChart data={data?.charts.byStatus ?? EMPTY_STATUS_DATA} />
           </div>
 

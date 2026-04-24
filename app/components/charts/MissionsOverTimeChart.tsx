@@ -13,16 +13,18 @@ import {
 
 interface Props {
   data: { year: number; count: number }[]
+  minYear: number
+  maxYear: number
 }
 
-export default memo(function MissionsOverTimeChart({ data }: Props) {
+export default memo(function MissionsOverTimeChart({ data, minYear, maxYear }: Props) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
       <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
         Launches per Year
       </h2>
       <p className="mb-4 text-xs text-gray-400 dark:text-gray-500">
-        Total missions launched each year, 1957–2022
+        Total missions launched each year, {minYear}–{maxYear}
       </p>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>

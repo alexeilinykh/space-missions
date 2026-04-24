@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 interface Stat {
   label: string
   value: string
@@ -12,7 +14,7 @@ interface Props {
   loading?: boolean
 }
 
-export default function SummaryStats({
+export default memo(function SummaryStats({
   totalMissions,
   overallSuccessRate,
   mostUsedRocket,
@@ -66,4 +68,4 @@ export default function SummaryStats({
       ))}
     </div>
   )
-}
+})
