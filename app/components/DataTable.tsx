@@ -35,6 +35,11 @@ const COLUMNS: ColDef[] = [
   { key: 'Price', label: 'Price (M$)', className: 'w-24 shrink-0 text-right hidden lg:table-cell' },
 ]
 
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (col !== sortKey) return <span className="ml-1 text-gray-300">↕</span>
+  return <span className="ml-1 text-blue-500">{sortDir === 'asc' ? '↑' : '↓'}</span>
+}
+
 export default function DataTable({ missions, loading }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('Date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -70,11 +75,6 @@ export default function DataTable({ missions, loading }: Props) {
     setPage(0)
   }
 
-  function SortIcon({ col }: { col: SortKey }) {
-    if (col !== sortKey) return <span className="ml-1 text-gray-300">↕</span>
-    return <span className="ml-1 text-blue-500">{sortDir === 'asc' ? '↑' : '↓'}</span>
-  }
-
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -108,7 +108,7 @@ export default function DataTable({ missions, loading }: Props) {
                   className={`cursor-pointer select-none px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 transition hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 ${col.className ?? ''}`}
                 >
                   {col.label}
-                  <SortIcon col={col.key} />
+                  <SortIcon col={col.key} sortKey={sortKey} sortDir={sortDir} />
                 </th>
               ))}
             </tr>
