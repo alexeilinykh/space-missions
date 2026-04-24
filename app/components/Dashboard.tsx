@@ -102,7 +102,7 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
           Space Missions Dashboard
         </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Global space launch data, 1957–2022
+          Global space launch data, {minYear}–{maxYear}
         </p>
       </header>
 

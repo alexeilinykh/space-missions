@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import type { Mission } from '@/lib/types'
 
 type SortKey = keyof Pick<Mission, 'Company' | 'Date' | 'Mission' | 'Rocket' | 'MissionStatus' | 'Price'>
@@ -40,7 +40,7 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
   return <span className="ml-1 text-blue-500">{sortDir === 'asc' ? '↑' : '↓'}</span>
 }
 
-export default function DataTable({ missions, loading }: Props) {
+const DataTable = memo(function DataTable({ missions, loading }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('Date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(0)
@@ -184,4 +184,6 @@ export default function DataTable({ missions, loading }: Props) {
       )}
     </div>
   )
-}
+})
+
+export default DataTable

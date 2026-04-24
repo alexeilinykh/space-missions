@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import type { MissionStatus } from '@/lib/types'
 import { MISSION_STATUSES } from '@/lib/types'
 
@@ -19,7 +19,7 @@ interface Props {
   maxYear: number
 }
 
-export default function FilterPanel({
+const FilterPanel = memo(function FilterPanel({
   companies,
   filters,
   onChange,
@@ -181,4 +181,6 @@ export default function FilterPanel({
       </button>
     </aside>
   )
-}
+})
+
+export default FilterPanel

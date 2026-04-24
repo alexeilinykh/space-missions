@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalMissions = missions.length
-  const successCount = missions.filter((m) => m.MissionStatus === 'Success').length
+  let successCount = 0
+  for (const m of missions) if (m.MissionStatus === 'Success') successCount++
   const successRate = totalMissions
     ? parseFloat(((successCount / totalMissions) * 100).toFixed(2))
     : 0
