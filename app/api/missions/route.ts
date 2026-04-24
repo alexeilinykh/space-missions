@@ -13,16 +13,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid year range' }, { status: 400 })
   }
 
-  // Use getMissionsByDateRange to get names in the date window (fulfils the
-  // requirement to call this function). Build a Set for O(1) lookups.
-  const namesInRange = new Set(
-    getMissionsByDateRange(`${startYear}-01-01`, `${endYear}-12-31`),
-  )
+  const startDate = `${startYear}-01-01`
+  const endDate = `${endYear}-12-31`
 
-  const allStatuses = new Set(statuses.length > 0 ? statuses : null)
+  // Names are not unique across the dataset, so a direct date check is also
+  // required to prevent rows with a duplicate name but an out-of-range date
+  // from slipping through.
+  const namesInRange = new Set(getMissionsByDateRange(startDate, endDate))
+  const allStatuses = new Set(statuses)
 
   const missions = getMissions().filter((m) => {
     if (!namesInRange.has(m.Mission)) return false
+    if (m.Date < startDate || m.Date > endDate) return false
     if (company && m.Company !== company) return false
     if (statuses.length > 0 && !allStatuses.has(m.MissionStatus)) return false
     return true
