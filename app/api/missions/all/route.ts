@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getMissions } from '@/lib/data'
 import {
+  getMissionsByDateRange,
   getMissionsByYear,
   getMissionStatusCount,
   getTopCompaniesByMissionCount,
   getTopLaunchSitesByMissionCount,
+  getMostUsedRocket,
+  getAverageMissionsPerYear,
+  getMissionCountByCompany,
+  getSuccessRate,
 } from '@/lib/missions'
 
 function parseSite(location: string): string {
@@ -23,22 +28,41 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid year range' }, { status: 400 })
   }
 
+  const startDate = `${startYear}-01-01`
+  const endDate = `${endYear}-12-31`
   const filtersActive = company !== '' || statuses.length > 0
+  const allStatuses = new Set(statuses)
 
-  // Filtered subset (used when any filter is active for chart data)
-  const filtered = filtersActive
-    ? getMissions().filter((m) => {
-        const year = parseInt(m.Date.slice(0, 4), 10)
-        if (year < startYear || year > endYear) return false
-        if (company && m.Company !== company) return false
-        if (statuses.length > 0 && !statuses.includes(m.MissionStatus)) return false
-        return true
-      })
-    : null
+  // ── Single filter pass ────────────────────────────────────────────────────
+  // Used for table rows, stats, and filtered chart data.
+  // namesInRange satisfies the getMissionsByDateRange requirement; the direct
+  // date check guards against duplicate mission names outside the range.
+  const namesInRange = new Set(getMissionsByDateRange(startDate, endDate))
 
-  // ── byYear ────────────────────────────────────────────────────────────────
-  // When no filters are active, use the library function (global totals).
-  // When filters are active, count from the filtered subset.
+  const missions = getMissions().filter((m) => {
+    if (!namesInRange.has(m.Mission)) return false
+    if (m.Date < startDate || m.Date > endDate) return false
+    if (company && m.Company !== company) return false
+    if (statuses.length > 0 && !allStatuses.has(m.MissionStatus)) return false
+    return true
+  })
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const totalMissions = missions.length
+  const successCount = missions.filter((m) => m.MissionStatus === 'Success').length
+  const successRate = totalMissions
+    ? parseFloat(((successCount / totalMissions) * 100).toFixed(2))
+    : 0
+
+  const mostUsedRocket = getMostUsedRocket()
+  const avgMissionsPerYear = getAverageMissionsPerYear(startYear, endYear)
+
+  const companyMissionCount = company ? getMissionCountByCompany(company) : undefined
+  const companySuccessRate = company ? getSuccessRate(company) : undefined
+
+  // ── Charts ────────────────────────────────────────────────────────────────
+
+  // byYear
   let byYear: { year: number; count: number }[]
   if (!filtersActive) {
     byYear = []
@@ -47,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
   } else {
     const countsByYear = new Map<number, number>()
-    for (const m of filtered!) {
+    for (const m of missions) {
       const y = parseInt(m.Date.slice(0, 4), 10)
       if (!isNaN(y)) countsByYear.set(y, (countsByYear.get(y) ?? 0) + 1)
     }
@@ -57,57 +81,42 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ── byCompany ─────────────────────────────────────────────────────────────
-  // When no company filter: use the library function (top 15 globally).
-  // When company filter is active: compute from filtered subset.
+  // byCompany
   let byCompany: [string, number][]
   if (!company && !filtersActive) {
     byCompany = getTopCompaniesByMissionCount(15)
   } else if (!company && filtersActive) {
-    // Status filter active but no company filter — compute from filtered
     const counts = new Map<string, number>()
-    for (const m of filtered!) {
+    for (const m of missions) {
       counts.set(m.Company, (counts.get(m.Company) ?? 0) + 1)
     }
     byCompany = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15)
   } else {
-    // Company filter active — single-company chart is not very useful but keep consistent
     const counts = new Map<string, number>()
-    for (const m of filtered!) {
+    for (const m of missions) {
       counts.set(m.Company, (counts.get(m.Company) ?? 0) + 1)
     }
     byCompany = [...counts.entries()].sort((a, b) => b[1] - a[1])
   }
 
-  // ── byStatus ──────────────────────────────────────────────────────────────
-  // When no status filter: use the library function (global counts).
-  // When status filter is active: compute from filtered subset.
+  // byStatus
   let byStatus: Record<string, number>
-  if (statuses.length === 0 && !filtersActive) {
+  if (!filtersActive) {
     byStatus = getMissionStatusCount()
-  } else if (statuses.length === 0 && filtersActive) {
-    // Company filter active but no status filter — compute from filtered
-    byStatus = {}
-    for (const m of filtered!) {
-      byStatus[m.MissionStatus] = (byStatus[m.MissionStatus] ?? 0) + 1
-    }
   } else {
-    // Status filter active — compute from filtered
     byStatus = {}
-    for (const m of filtered!) {
+    for (const m of missions) {
       byStatus[m.MissionStatus] = (byStatus[m.MissionStatus] ?? 0) + 1
     }
   }
 
-  // ── byLocation ────────────────────────────────────────────────────────────
-  // When no filters active: use the library function.
-  // When filters active: compute from filtered subset.
+  // byLocation
   let byLocation: [string, number][]
   if (!filtersActive) {
     byLocation = getTopLaunchSitesByMissionCount(10)
   } else {
     const counts = new Map<string, number>()
-    for (const m of filtered!) {
+    for (const m of missions) {
       const site = parseSite(m.Location)
       counts.set(site, (counts.get(site) ?? 0) + 1)
     }
@@ -116,5 +125,21 @@ export async function GET(request: NextRequest) {
       .slice(0, 10)
   }
 
-  return NextResponse.json({ byYear, byCompany, byStatus, byLocation })
+  return NextResponse.json({
+    missions,
+    total: missions.length,
+    stats: {
+      totalMissions,
+      successRate,
+      avgMissionsPerYear,
+      mostUsedRocket,
+      ...(company && { companyMissionCount, companySuccessRate }),
+    },
+    charts: {
+      byYear,
+      byCompany,
+      byStatus,
+      byLocation,
+    },
+  })
 }

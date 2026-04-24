@@ -11,25 +11,25 @@ import TopCompaniesChart from './charts/TopCompaniesChart'
 import MissionStatusChart from './charts/MissionStatusChart'
 import TopLaunchSitesChart from './charts/TopLaunchSitesChart'
 
-// ── Types matching the API response shapes ────────────────────────────────────
+// ── Types matching the API response shape ─────────────────────────────────────
 
-interface TableData {
+interface AllData {
   missions: Mission[]
   total: number
-}
-
-interface StatsData {
-  totalMissions: number
-  successRate: number
-  avgMissionsPerYear: number
-  mostUsedRocket: string
-}
-
-interface ChartsData {
-  byYear: { year: number; count: number }[]
-  byCompany: [string, number][]
-  byStatus: Record<string, number>
-  byLocation: [string, number][]
+  stats: {
+    totalMissions: number
+    successRate: number
+    avgMissionsPerYear: number
+    mostUsedRocket: string
+    companyMissionCount?: number
+    companySuccessRate?: number
+  }
+  charts: {
+    byYear: { year: number; count: number }[]
+    byCompany: [string, number][]
+    byStatus: Record<string, number>
+    byLocation: [string, number][]
+  }
 }
 
 // ── SWR fetcher ───────────────────────────────────────────────────────────────
@@ -90,21 +90,8 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
   // since FilterPanel now only calls onChange on explicit Apply / Reset.
   const swrParams = buildParams(filters)
 
-  // ── SWR hooks ───────────────────────────────────────────────────────────────
-  const { data: tableData, isLoading: tableLoading } = useSWR<TableData>(
-    `/api/missions?${swrParams}`,
-    fetcher,
-    { revalidateOnFocus: false, revalidateOnReconnect: false },
-  )
-
-  const { data: statsData, isLoading: statsLoading } = useSWR<StatsData>(
-    `/api/missions/stats?${swrParams}`,
-    fetcher,
-    { revalidateOnFocus: false, revalidateOnReconnect: false },
-  )
-
-  const { data: chartsData, isLoading: chartsLoading } = useSWR<ChartsData>(
-    `/api/missions/charts?${swrParams}`,
+  const { data, isLoading } = useSWR<AllData>(
+    `/api/missions/all?${swrParams}`,
     fetcher,
     { revalidateOnFocus: false, revalidateOnReconnect: false },
   )
@@ -137,30 +124,30 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
         {/* Main content */}
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           {/* Summary stats */}
-          <div className={statsLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+          <div className={isLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
             <SummaryStats
-              totalMissions={statsData?.totalMissions ?? 0}
-              overallSuccessRate={statsData?.successRate ?? 0}
-              mostUsedRocket={statsData?.mostUsedRocket ?? '—'}
-              avgMissionsPerYear={statsData?.avgMissionsPerYear ?? 0}
-              loading={statsLoading}
+              totalMissions={data?.stats.totalMissions ?? 0}
+              overallSuccessRate={data?.stats.successRate ?? 0}
+              mostUsedRocket={data?.stats.mostUsedRocket ?? '—'}
+              avgMissionsPerYear={data?.stats.avgMissionsPerYear ?? 0}
+              loading={isLoading}
             />
           </div>
 
           {/* Charts row 1 */}
           <div
-            className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${chartsLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
+            className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${isLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
           >
-            <MissionsOverTimeChart data={chartsData?.byYear ?? []} />
-            <MissionStatusChart data={chartsData?.byStatus ?? {}} />
+            <MissionsOverTimeChart data={data?.charts.byYear ?? []} />
+            <MissionStatusChart data={data?.charts.byStatus ?? {}} />
           </div>
 
           {/* Charts row 2 */}
           <div
-            className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${chartsLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
+            className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${isLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
           >
-            <TopCompaniesChart data={chartsData?.byCompany ?? []} />
-            <TopLaunchSitesChart data={chartsData?.byLocation ?? []} />
+            <TopCompaniesChart data={data?.charts.byCompany ?? []} />
+            <TopLaunchSitesChart data={data?.charts.byLocation ?? []} />
           </div>
 
           {/* Data table */}
@@ -169,8 +156,8 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
               Mission Records
             </h2>
             <DataTable
-              missions={tableData?.missions ?? []}
-              loading={tableLoading}
+              missions={data?.missions ?? []}
+              loading={isLoading}
             />
           </div>
         </div>
