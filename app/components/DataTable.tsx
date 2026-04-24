@@ -39,6 +39,11 @@ export default function DataTable({ missions, loading }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('Date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(0)
+  const [prevMissions, setPrevMissions] = useState(missions)
+  if (prevMissions !== missions) {
+    setPrevMissions(missions)
+    setPage(0)
+  }
 
   const sorted = useMemo(() => {
     const dir = sortDir === 'asc' ? 1 : -1
