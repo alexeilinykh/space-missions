@@ -151,21 +151,28 @@ export async function GET(request: NextRequest) {
       .slice(0, 10)
   }
 
-  return NextResponse.json({
-    missions,
-    total: missions.length,
-    stats: {
-      totalMissions,
-      successRate,
-      avgMissionsPerYear,
-      mostUsedRocket,
-      ...(company && { companyMissionCount, companySuccessRate }),
+  return NextResponse.json(
+    {
+      missions,
+      total: missions.length,
+      stats: {
+        totalMissions,
+        successRate,
+        avgMissionsPerYear,
+        mostUsedRocket,
+        ...(company && { companyMissionCount, companySuccessRate }),
+      },
+      charts: {
+        byYear,
+        byCompany,
+        byStatus,
+        byLocation,
+      },
     },
-    charts: {
-      byYear,
-      byCompany,
-      byStatus,
-      byLocation,
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=60, stale-while-revalidate=60',
+      },
     },
-  })
+  )
 }
