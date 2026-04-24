@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
+import { MISSION_STATUSES } from '@/lib/types'
 
 interface Props {
   data: Record<string, number>
@@ -23,12 +24,10 @@ const STATUS_COLORS: Record<string, string> = {
   'Prelaunch Failure': '#f97316',
 }
 
-const STATUS_ORDER = ['Success', 'Failure', 'Partial Failure', 'Prelaunch Failure']
-
 export default memo(function MissionStatusChart({ data }: Props) {
   const chartData = useMemo(
     () =>
-      STATUS_ORDER.filter((s) => data[s] !== undefined).map((status) => ({
+      MISSION_STATUSES.filter((s) => data[s] !== undefined).map((status) => ({
         status,
         count: data[status] ?? 0,
       })),

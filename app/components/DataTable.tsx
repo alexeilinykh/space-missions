@@ -62,8 +62,14 @@ export default function DataTable({ missions, loading }: Props) {
     })
   }, [missions, sortKey, sortDir])
 
-  const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
-  const pageData = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const totalPages = useMemo(
+    () => Math.ceil(sorted.length / PAGE_SIZE),
+    [sorted],
+  )
+  const pageData = useMemo(
+    () => sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+    [sorted, page],
+  )
 
   const handleSort = useCallback((key: SortKey) => {
     if (key === sortKey) {

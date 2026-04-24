@@ -161,7 +161,7 @@ export function getMostUsedRocket(): string {
  * Parses a raw Location string and returns a short site label using the
  * last two comma-separated parts (e.g. "Baikonur Cosmodrome, Kazakhstan").
  */
-function parseSite(location: string): string {
+export function parseSite(location: string): string {
   const parts = location.split(',').map((p) => p.trim())
   return parts.slice(-2).join(', ')
 }

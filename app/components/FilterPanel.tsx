@@ -1,14 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import type { MissionStatus } from '@/lib/types'
-
-const ALL_STATUSES: MissionStatus[] = [
-  'Success',
-  'Failure',
-  'Partial Failure',
-  'Prelaunch Failure',
-]
+import { MISSION_STATUSES } from '@/lib/types'
 
 export interface Filters {
   company: string
@@ -82,7 +76,7 @@ export default function FilterPanel({
   function handleReset() {
     const defaults: Filters = {
       company: '',
-      statuses: new Set(ALL_STATUSES),
+      statuses: new Set(MISSION_STATUSES),
       startYear: minYear,
       endYear: maxYear,
     }
@@ -91,12 +85,15 @@ export default function FilterPanel({
   }
 
   // Highlight Apply when pending state differs from what's actually applied.
-  const isPending =
-    pending.company !== filters.company ||
-    localStart !== String(filters.startYear) ||
-    localEnd !== String(filters.endYear) ||
-    pending.statuses.size !== filters.statuses.size ||
-    [...pending.statuses].some((s) => !filters.statuses.has(s))
+  const isPending = useMemo(
+    () =>
+      pending.company !== filters.company ||
+      localStart !== String(filters.startYear) ||
+      localEnd !== String(filters.endYear) ||
+      pending.statuses.size !== filters.statuses.size ||
+      [...pending.statuses].some((s) => !filters.statuses.has(s)),
+    [pending.company, pending.statuses, filters, localStart, localEnd],
+  )
 
   return (
     <aside className="flex flex-col gap-6 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
@@ -123,7 +120,7 @@ export default function FilterPanel({
           Mission Status
         </p>
         <div className="flex flex-col gap-1.5">
-          {ALL_STATUSES.map((s) => (
+          {MISSION_STATUSES.map((s) => (
             <label key={s} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <input
                 type="checkbox"

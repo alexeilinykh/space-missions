@@ -10,14 +10,10 @@ import {
   getAverageMissionsPerYear,
   getMissionCountByCompany,
   getSuccessRate,
+  parseSite,
   MIN_YEAR,
   MAX_YEAR,
 } from '@/lib/missions'
-
-function parseSite(location: string): string {
-  const parts = location.split(',').map((p) => p.trim())
-  return parts.slice(-2).join(', ')
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl

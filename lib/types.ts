@@ -4,6 +4,13 @@ export type MissionStatus =
   | 'Partial Failure'
   | 'Prelaunch Failure'
 
+export const MISSION_STATUSES: MissionStatus[] = [
+  'Success',
+  'Failure',
+  'Partial Failure',
+  'Prelaunch Failure',
+]
+
 export type RocketStatus = 'Active' | 'Retired'
 
 export interface Mission {

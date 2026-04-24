@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
 import type { Mission, MissionStatus } from '@/lib/types'
+import { MISSION_STATUSES } from '@/lib/types'
 import FilterPanel, { type Filters } from './FilterPanel'
 import SummaryStats from './SummaryStats'
 import DataTable from './DataTable'
@@ -50,25 +51,13 @@ const EMPTY_MISSIONS: Mission[] = []
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const ALL_STATUSES = new Set<MissionStatus>([
-  'Success',
-  'Failure',
-  'Partial Failure',
-  'Prelaunch Failure',
-])
-
-const ALL_STATUS_ARRAY: MissionStatus[] = [
-  'Success',
-  'Failure',
-  'Partial Failure',
-  'Prelaunch Failure',
-]
+const ALL_STATUSES = new Set<MissionStatus>(MISSION_STATUSES)
 
 function buildParams(filters: Filters): string {
   const p = new URLSearchParams()
   if (filters.company) p.set('company', filters.company)
   // Only send status params when fewer than all are selected
-  if (filters.statuses.size < ALL_STATUS_ARRAY.length) {
+  if (filters.statuses.size < MISSION_STATUSES.length) {
     for (const s of filters.statuses) p.append('status', s)
   }
   p.set('startYear', String(filters.startYear))
