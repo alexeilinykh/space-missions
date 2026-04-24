@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useMemo } from 'react'
 import {
   BarChart,
   Bar,
@@ -24,11 +25,15 @@ const STATUS_COLORS: Record<string, string> = {
 
 const STATUS_ORDER = ['Success', 'Failure', 'Partial Failure', 'Prelaunch Failure']
 
-export default function MissionStatusChart({ data }: Props) {
-  const chartData = STATUS_ORDER.filter((s) => data[s] !== undefined).map((status) => ({
-    status,
-    count: data[status] ?? 0,
-  }))
+export default memo(function MissionStatusChart({ data }: Props) {
+  const chartData = useMemo(
+    () =>
+      STATUS_ORDER.filter((s) => data[s] !== undefined).map((status) => ({
+        status,
+        count: data[status] ?? 0,
+      })),
+    [data],
+  )
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
@@ -79,4 +84,4 @@ export default function MissionStatusChart({ data }: Props) {
       </ResponsiveContainer>
     </div>
   )
-}
+})

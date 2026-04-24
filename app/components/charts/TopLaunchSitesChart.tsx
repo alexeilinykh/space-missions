@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useMemo } from 'react'
 import {
   BarChart,
   Bar,
@@ -20,8 +21,11 @@ const COLORS = [
   '#a7f3d0', '#d1fae5', '#065f46', '#14b8a6', '#2dd4bf',
 ]
 
-export default function TopLaunchSitesChart({ data }: Props) {
-  const chartData = data.map(([site, count]) => ({ site, count }))
+export default memo(function TopLaunchSitesChart({ data }: Props) {
+  const chartData = useMemo(
+    () => data.map(([site, count]) => ({ site, count })),
+    [data],
+  )
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
@@ -62,12 +66,12 @@ export default function TopLaunchSitesChart({ data }: Props) {
             formatter={(v) => [v ?? 0, 'Missions']}
           />
           <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-            {chartData.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            {chartData.map((entry, i) => (
+              <Cell key={entry.site} fill={COLORS[i % COLORS.length]} />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>
   )
-}
+})

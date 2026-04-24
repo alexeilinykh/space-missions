@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import {
   LineChart,
   Line,
@@ -14,7 +15,7 @@ interface Props {
   data: { year: number; count: number }[]
 }
 
-export default function MissionsOverTimeChart({ data }: Props) {
+export default memo(function MissionsOverTimeChart({ data }: Props) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
       <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -60,4 +61,4 @@ export default function MissionsOverTimeChart({ data }: Props) {
       </ResponsiveContainer>
     </div>
   )
-}
+})

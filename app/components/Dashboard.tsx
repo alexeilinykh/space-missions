@@ -40,6 +40,14 @@ const fetcher = (url: string) =>
     return r.json()
   })
 
+// ── Stable empty defaults (module-level so references never change) ───────────
+
+const EMPTY_YEAR_DATA: { year: number; count: number }[] = []
+const EMPTY_COMPANY_DATA: [string, number][] = []
+const EMPTY_STATUS_DATA: Record<string, number> = {}
+const EMPTY_LOCATION_DATA: [string, number][] = []
+const EMPTY_MISSIONS: Mission[] = []
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const ALL_STATUSES = new Set<MissionStatus>([
@@ -138,16 +146,16 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
           <div
             className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${isLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
           >
-            <MissionsOverTimeChart data={data?.charts.byYear ?? []} />
-            <MissionStatusChart data={data?.charts.byStatus ?? {}} />
+            <MissionsOverTimeChart data={data?.charts.byYear ?? EMPTY_YEAR_DATA} />
+            <MissionStatusChart data={data?.charts.byStatus ?? EMPTY_STATUS_DATA} />
           </div>
 
           {/* Charts row 2 */}
           <div
             className={`grid grid-cols-1 gap-6 xl:grid-cols-2 ${isLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
           >
-            <TopCompaniesChart data={data?.charts.byCompany ?? []} />
-            <TopLaunchSitesChart data={data?.charts.byLocation ?? []} />
+            <TopCompaniesChart data={data?.charts.byCompany ?? EMPTY_COMPANY_DATA} />
+            <TopLaunchSitesChart data={data?.charts.byLocation ?? EMPTY_LOCATION_DATA} />
           </div>
 
           {/* Data table */}
@@ -156,7 +164,7 @@ export default function Dashboard({ companies, minYear, maxYear }: Props) {
               Mission Records
             </h2>
             <DataTable
-              missions={data?.missions ?? []}
+              missions={data?.missions ?? EMPTY_MISSIONS}
               loading={isLoading}
             />
           </div>
