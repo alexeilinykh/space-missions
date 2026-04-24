@@ -56,7 +56,24 @@ export async function GET(request: NextRequest) {
     ? parseFloat(((successCount / totalMissions) * 100).toFixed(2))
     : 0
 
-  const mostUsedRocket = getMostUsedRocket()
+  let mostUsedRocket: string
+  if (!filtersActive) {
+    mostUsedRocket = getMostUsedRocket()
+  } else {
+    const counts = new Map<string, number>()
+    for (const m of missions) {
+      if (m.Rocket) counts.set(m.Rocket, (counts.get(m.Rocket) ?? 0) + 1)
+    }
+    let top = ''
+    let topCount = 0
+    for (const [rocket, count] of counts) {
+      if (count > topCount || (count === topCount && rocket < top)) {
+        top = rocket
+        topCount = count
+      }
+    }
+    mostUsedRocket = top
+  }
   const avgMissionsPerYear = getAverageMissionsPerYear(startYear, endYear)
 
   const companyMissionCount = company ? getMissionCountByCompany(company) : undefined
