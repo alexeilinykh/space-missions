@@ -10,6 +10,8 @@ import {
   getAverageMissionsPerYear,
   getMissionCountByCompany,
   getSuccessRate,
+  MIN_YEAR,
+  MAX_YEAR,
 } from '@/lib/missions'
 
 function parseSite(location: string): string {
@@ -30,7 +32,11 @@ export async function GET(request: NextRequest) {
 
   const startDate = `${startYear}-01-01`
   const endDate = `${endYear}-12-31`
-  const filtersActive = company !== '' || statuses.length > 0
+  const filtersActive =
+    company !== '' ||
+    statuses.length > 0 ||
+    startYear !== MIN_YEAR ||
+    endYear !== MAX_YEAR
   const allStatuses = new Set(statuses)
 
   // ── Single filter pass ────────────────────────────────────────────────────
